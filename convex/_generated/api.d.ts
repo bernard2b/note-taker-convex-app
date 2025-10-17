@@ -9,6 +9,7 @@
  */
 
 import type * as myFunctions from "../myFunctions.js";
+import type * as notes from "../notes.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   myFunctions: typeof myFunctions;
+  notes: typeof notes;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
