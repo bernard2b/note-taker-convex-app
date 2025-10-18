@@ -63,6 +63,7 @@ export const searchNotes = query({
 
 export const createNote = mutation({
   args: {
+    userId: v.string(),
     title: v.string(),
     content: v.string(),
   },
@@ -76,14 +77,9 @@ export const createNote = mutation({
     updatedAt: v.number(),
   }),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthenticated");
-    }
-
     const now = Date.now();
     const noteId = await ctx.db.insert("notes", {
-      userId: identity.subject,
+      userId: args.userId,
       title: args.title,
       content: args.content,
       createdAt: now,
@@ -101,6 +97,7 @@ export const createNote = mutation({
 
 export const updateNote = mutation({
   args: {
+    userId: v.string(),
     noteId: v.id("notes"),
     title: v.string(),
     content: v.string(),
@@ -115,17 +112,12 @@ export const updateNote = mutation({
     updatedAt: v.number(),
   }),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthenticated");
-    }
-
     const existingNote = await ctx.db.get(args.noteId);
     if (!existingNote) {
       throw new Error("Note not found");
     }
 
-    if (existingNote.userId !== identity.subject) {
+    if (existingNote.userId !== args.userId) {
       throw new Error("Unauthorized: You don't own this note");
     }
 
@@ -147,25 +139,20 @@ export const updateNote = mutation({
 
 export const deleteNote = mutation({
   args: {
+    userId: v.string(),
     noteId: v.id("notes"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Unauthenticated");
-    }
-
     const existingNote = await ctx.db.get(args.noteId);
     if (!existingNote) {
       throw new Error("Note not found");
     }
 
-    if (existingNote.userId !== identity.subject) {
+    if (existingNote.userId !== args.userId) {
       throw new Error("Unauthorized: You don't own this note");
     }
 
-    // Delete the note
     await ctx.db.delete(args.noteId);
 
     return null;
