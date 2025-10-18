@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { LogEntry } from "./LogEntry";
+import { LogStats } from "./LogStats";
 
 export function LogViewer() {
   const [isPaused, setIsPaused] = useState(false);
@@ -36,27 +37,20 @@ export function LogViewer() {
   };
 
   const handleExportLogs = () => {
-    const exportData = {
-      exportedAt: new Date().toISOString(),
-      totalLogs: displayedLogs.length,
-      logs: displayedLogs.map((log) => ({
-        id: log._id,
-        type: log.type,
-        operation: log.operation,
-        userId: log.userId,
-        data: log.data,
-        timestamp: log.timestamp,
-        timestampISO: new Date(log.timestamp).toISOString(),
-        executionTime: log.executionTime,
-      })),
-    };
+    const logsText = displayedLogs
+      .map((log) => {
+        const timestamp = new Date(log.timestamp).toISOString();
+        const user = log.userId ? ` | User: ${log.userId}` : "";
+        const execTime = log.executionTime ? ` | ${log.executionTime}ms` : "";
+        return `[${timestamp}] ${log.type.toUpperCase()} | ${log.operation}${user}${execTime}`;
+      })
+      .join("\n");
 
-    const jsonString = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([jsonString], { type: "application/json" });
+    const blob = new Blob([logsText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `logs-${Date.now()}.json`;
+    a.download = `logs-${Date.now()}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -177,6 +171,9 @@ export function LogViewer() {
         ref={containerRef}
         className="flex-1 overflow-auto p-4 space-y-3"
       >
+        {/* Stats Section */}
+        <LogStats />
+
         {displayedLogs.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-lg border-2 border-dashed border-gray-300">
             <svg
