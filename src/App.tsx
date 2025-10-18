@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { LoginScreen, UserSwitcher } from "./components/Auth";
+import { LoginScreen } from "./components/Auth";
+import { Header, SplitLayout } from "./components/Layout";
 
 export default function App() {
   const [username, setUsername] = useState<string | null>(null);
@@ -13,6 +14,7 @@ export default function App() {
     username ? { username } : "skip",
   );
   const activeUsers = useQuery(api.auth.getActiveUsers) ?? [];
+  const stats = useQuery(api.logs.getStats);
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -46,94 +48,157 @@ export default function App() {
   }
 
   return (
-    <>
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-gray-900">Note Taker</h1>
-          </div>
-          <UserSwitcher
-            currentUser={currentUser}
-            activeUsers={activeUsers}
-            onSwitchUser={handleSwitchUser}
-            onLogout={handleLogout}
-          />
-        </div>
-      </header>
-      <main className="p-8 flex flex-col gap-16">
-        <Content userId={username} />
-      </main>
-    </>
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
+      <Header
+        currentUser={currentUser}
+        activeUsers={activeUsers}
+        stats={stats}
+        isConnected={true}
+        onSwitchUser={handleSwitchUser}
+        onLogout={handleLogout}
+      />
+      <div className="flex-1 overflow-hidden">
+        <SplitLayout
+          left={<NotesPanel userId={username} />}
+          right={<LogsPanel />}
+        />
+      </div>
+    </div>
   );
 }
 
-function Content({ userId }: { userId: string }) {
+function NotesPanel({ userId }: { userId: string }) {
   const notes = useQuery(api.notes.listNotes, { userId }) ?? [];
 
   return (
-    <div className="flex flex-col gap-8 max-w-4xl mx-auto">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-900">Your Notes</h2>
-        <p className="text-gray-600 mt-2">
-          Welcome back! You have {notes.length} note{notes.length !== 1 ? "s" : ""}
-        </p>
-      </div>
+    <div className="h-full bg-white p-6 overflow-auto">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Your Notes</h2>
+          <p className="text-gray-600 mt-1">
+            {notes.length} note{notes.length !== 1 ? "s" : ""}
+          </p>
+        </div>
 
-      {notes.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <svg
-            className="w-16 h-16 text-gray-400 mx-auto mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No notes yet
-          </h3>
-          <p className="text-gray-600">Create your first note to get started!</p>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {notes.map((note) => (
-            <div
-              key={note._id}
-              className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow"
+        {notes.length === 0 ? (
+          <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <svg
+              className="w-16 h-16 text-gray-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {note.title}
-              </h3>
-              <p className="text-gray-600 mb-4">{note.content}</p>
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <span>
-                  Updated: {new Date(note.updatedAt).toLocaleDateString()}
-                </span>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No notes yet
+            </h3>
+            <p className="text-gray-600">Create your first note to get started!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {notes.map((note) => (
+              <div
+                key={note._id}
+                className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow"
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {note.title}
+                </h3>
+                <p className="text-gray-600 mb-4">{note.content}</p>
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>
+                    Updated: {new Date(note.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LogsPanel() {
+  const logs = useQuery(api.logs.getLogs) ?? [];
+
+  return (
+    <div className="h-full bg-gray-50 p-6 overflow-auto">
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900">Activity Logs</h2>
+          <p className="text-gray-600 mt-1">Recent operations and events</p>
         </div>
-      )}
+
+        {logs.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-lg border-2 border-dashed border-gray-300">
+            <svg
+              className="w-16 h-16 text-gray-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No logs yet</h3>
+            <p className="text-gray-600">Activity will appear here</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {logs.map((log) => (
+              <div
+                key={log._id}
+                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          log.type === "error"
+                            ? "bg-red-100 text-red-800"
+                            : log.type === "mutation"
+                              ? "bg-blue-100 text-blue-800"
+                              : log.type === "query"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-purple-100 text-purple-800"
+                        }`}
+                      >
+                        {log.type}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900 truncate">
+                        {log.operation}
+                      </span>
+                    </div>
+                    {log.userId && (
+                      <p className="text-xs text-gray-500">User: {log.userId}</p>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs text-gray-500">
+                      {new Date(log.timestamp).toLocaleTimeString()}
+                    </p>
+                    {log.executionTime && (
+                      <p className="text-xs text-gray-400">{log.executionTime}ms</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
