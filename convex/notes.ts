@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 export const listNotes = query({
   args: {
@@ -77,6 +78,8 @@ export const createNote = mutation({
     updatedAt: v.number(),
   }),
   handler: async (ctx, args) => {
+    const startTime = Date.now();
+
     const now = Date.now();
     const noteId = await ctx.db.insert("notes", {
       userId: args.userId,
@@ -90,6 +93,21 @@ export const createNote = mutation({
     if (!note) {
       throw new Error("Failed to create note");
     }
+
+    const executionTime = Date.now() - startTime;
+
+    // Log the operation
+    await ctx.scheduler.runAfter(0, api.logs.addLog, {
+      type: "mutation",
+      operation: "notes.createNote",
+      userId: args.userId,
+      data: {
+        noteId: note._id,
+        title: args.title,
+        contentLength: args.content.length,
+      },
+      executionTime,
+    });
 
     return note;
   },
@@ -112,6 +130,8 @@ export const updateNote = mutation({
     updatedAt: v.number(),
   }),
   handler: async (ctx, args) => {
+    const startTime = Date.now();
+
     const existingNote = await ctx.db.get(args.noteId);
     if (!existingNote) {
       throw new Error("Note not found");
@@ -133,6 +153,22 @@ export const updateNote = mutation({
       throw new Error("Failed to update note");
     }
 
+    const executionTime = Date.now() - startTime;
+
+    // Log the operation
+    await ctx.scheduler.runAfter(0, api.logs.addLog, {
+      type: "mutation",
+      operation: "notes.updateNote",
+      userId: args.userId,
+      data: {
+        noteId: args.noteId,
+        title: args.title,
+        contentLength: args.content.length,
+        previousTitle: existingNote.title,
+      },
+      executionTime,
+    });
+
     return updatedNote;
   },
 });
@@ -144,6 +180,8 @@ export const deleteNote = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const startTime = Date.now();
+
     const existingNote = await ctx.db.get(args.noteId);
     if (!existingNote) {
       throw new Error("Note not found");
@@ -154,6 +192,21 @@ export const deleteNote = mutation({
     }
 
     await ctx.db.delete(args.noteId);
+
+    const executionTime = Date.now() - startTime;
+
+    // Log the operation
+    await ctx.scheduler.runAfter(0, api.logs.addLog, {
+      type: "mutation",
+      operation: "notes.deleteNote",
+      userId: args.userId,
+      data: {
+        noteId: args.noteId,
+        deletedTitle: existingNote.title,
+        deletedContentLength: existingNote.content.length,
+      },
+      executionTime,
+    });
 
     return null;
   },

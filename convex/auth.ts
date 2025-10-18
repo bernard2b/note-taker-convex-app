@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 export const loginDemoUser = mutation({
   args: {
@@ -13,12 +14,16 @@ export const loginDemoUser = mutation({
     lastActive: v.number(),
   }),
   handler: async (ctx, args) => {
+    const startTime = Date.now();
     const now = Date.now();
 
     const existingUser = await ctx.db
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", args.username))
       .unique();
+
+    let user;
+    let isNewUser = false;
 
     if (existingUser) {
       await ctx.db.patch(existingUser._id, {
@@ -29,20 +34,35 @@ export const loginDemoUser = mutation({
       if (!updatedUser) {
         throw new Error("Failed to update user");
       }
+      user = updatedUser;
+    } else {
+      const userId = await ctx.db.insert("users", {
+        username: args.username,
+        displayName: args.username,
+        lastActive: now,
+      });
 
-      return updatedUser;
+      const newUser = await ctx.db.get(userId);
+      if (!newUser) {
+        throw new Error("Failed to create user");
+      }
+      user = newUser;
+      isNewUser = true;
     }
 
-    const userId = await ctx.db.insert("users", {
-      username: args.username,
-      displayName: args.username,
-      lastActive: now,
+    const executionTime = Date.now() - startTime;
+
+    // Log the operation
+    await ctx.scheduler.runAfter(0, api.logs.addLog, {
+      type: "mutation",
+      operation: "auth.loginDemoUser",
+      userId: args.username,
+      data: {
+        username: args.username,
+        isNewUser,
+      },
+      executionTime,
     });
-
-    const user = await ctx.db.get(userId);
-    if (!user) {
-      throw new Error("Failed to create user");
-    }
 
     return user;
   },
@@ -54,6 +74,8 @@ export const logoutUser = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const startTime = Date.now();
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_username", (q) => q.eq("username", args.username))
@@ -66,6 +88,19 @@ export const logoutUser = mutation({
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
     await ctx.db.patch(user._id, {
       lastActive: fiveMinutesAgo,
+    });
+
+    const executionTime = Date.now() - startTime;
+
+    // Log the operation
+    await ctx.scheduler.runAfter(0, api.logs.addLog, {
+      type: "mutation",
+      operation: "auth.logoutUser",
+      userId: args.username,
+      data: {
+        username: args.username,
+      },
+      executionTime,
     });
 
     return null;
