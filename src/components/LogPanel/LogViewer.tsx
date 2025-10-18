@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { LogEntry } from "./LogEntry";
+import { LogStats } from "./LogStats";
 
 export function LogViewer() {
   const [isPaused, setIsPaused] = useState(false);
@@ -170,6 +171,9 @@ export function LogViewer() {
         ref={containerRef}
         className="flex-1 overflow-auto p-4 space-y-3"
       >
+        {/* Stats Section */}
+        <LogStats />
+
         {displayedLogs.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-lg border-2 border-dashed border-gray-300">
             <svg
