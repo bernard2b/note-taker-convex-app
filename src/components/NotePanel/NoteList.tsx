@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { NoteItem } from "./NoteItem";
+import { NoteForm } from "./NoteForm";
 
 type NoteListProps = {
   userId: string;
 };
 
 export function NoteList({ userId }: NoteListProps) {
+  const [showForm, setShowForm] = useState(false);
+  
   // Convex useQuery provides real-time subscriptions automatically
   const notes = useQuery(api.notes.listNotes, { userId });
 
@@ -30,7 +34,7 @@ export function NoteList({ userId }: NoteListProps) {
   }
 
   // Empty state - user-friendly with helpful message
-  if (notes.length === 0) {
+  if (notes.length === 0 && !showForm) {
     return (
       <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg border-2 border-dashed border-gray-300 animate-fade-in">
         <svg
@@ -52,7 +56,10 @@ export function NoteList({ userId }: NoteListProps) {
         <p className="text-gray-600 mb-6 max-w-sm mx-auto">
           Start capturing your ideas! Create your first note to get started.
         </p>
-        <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg hover:scale-105 transform">
+        <button
+          onClick={() => setShowForm(true)}
+          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg hover:scale-105 transform"
+        >
           <span className="flex items-center gap-2">
             <svg
               className="w-5 h-5"
@@ -77,12 +84,44 @@ export function NoteList({ userId }: NoteListProps) {
   // Notes list with animations - updates automatically via Convex real-time
   return (
     <div className="space-y-4">
-      {notes.map((note, index) => (
+      {/* Create Note Button / Form Toggle */}
+      {!showForm ? (
+        <button
+          onClick={() => setShowForm(true)}
+          className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Create New Note
+        </button>
+      ) : (
+        <div className="animate-slide-in-up">
+          <NoteForm
+            userId={userId}
+            onCancel={() => setShowForm(false)}
+            onSuccess={() => setShowForm(false)}
+          />
+        </div>
+      )}
+
+      {/* Notes List */}
+      {notes && notes.length > 0 && notes.map((note, index) => (
         <div
           key={note._id}
           className="animate-slide-in-up"
           style={{
-            animationDelay: `${index * 50}ms`,
+            animationDelay: `${(index + 1) * 50}ms`,
             animationFillMode: "backwards",
           }}
         >
