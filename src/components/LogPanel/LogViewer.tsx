@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { LogEntry } from "./LogEntry";
 
 export function LogViewer() {
   const [isPaused, setIsPaused] = useState(false);
@@ -63,21 +64,6 @@ export function LogViewer() {
       setDisplayedLogs([]);
     } catch (error) {
       console.error("Failed to clear logs:", error);
-    }
-  };
-
-  const getLogTypeColor = (type: string) => {
-    switch (type) {
-      case "error":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "mutation":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "query":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "subscription":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -205,38 +191,16 @@ export function LogViewer() {
         ) : (
           <>
             {displayedLogs.map((log) => (
-              <div
+              <LogEntry
                 key={log._id}
-                className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${getLogTypeColor(
-                          log.type,
-                        )}`}
-                      >
-                        {log.type}
-                      </span>
-                      <span className="text-sm font-medium text-gray-900 truncate">
-                        {log.operation}
-                      </span>
-                    </div>
-                    {log.userId && (
-                      <p className="text-xs text-gray-500 mb-1">User: {log.userId}</p>
-                    )}
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-xs text-gray-500">
-                      {new Date(log.timestamp).toLocaleTimeString()}
-                    </p>
-                    {log.executionTime && (
-                      <p className="text-xs text-gray-400">{log.executionTime}ms</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+                id={log._id}
+                type={log.type}
+                operation={log.operation}
+                userId={log.userId}
+                data={log.data}
+                timestamp={log.timestamp}
+                executionTime={log.executionTime}
+              />
             ))}
             <div ref={logsEndRef} />
           </>
