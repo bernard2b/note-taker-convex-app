@@ -111,7 +111,7 @@ export function NoteForm({ userId, onCancel, onSuccess }: NoteFormProps) {
               if (titleError) setTitleError(null);
             }}
             placeholder="Enter note title..."
-            className={`w-full px-4 py-2 text-lg font-semibold border rounded-lg focus:ring-2 outline-none transition-colors ${
+            className={`w-full px-4 py-2 text-lg font-semibold text-gray-900 border rounded-lg focus:ring-2 outline-none transition-colors ${
               titleError
                 ? "border-red-300 focus:border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
@@ -144,7 +144,7 @@ export function NoteForm({ userId, onCancel, onSuccess }: NoteFormProps) {
             onChange={(e) => setContent(e.target.value)}
             placeholder="Write your note content here..."
             rows={4}
-            className="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none resize-none overflow-hidden transition-colors"
+            className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none resize-none overflow-hidden transition-colors"
             disabled={isSubmitting}
           />
           <p className="mt-1 text-xs text-gray-500">

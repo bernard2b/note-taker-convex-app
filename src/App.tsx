@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { LoginScreen } from "./components/Auth";
 import { Header, SplitLayout } from "./components/Layout";
+import { NoteList } from "./components/NotePanel";
 
 export default function App() {
   const [username, setUsername] = useState<string | null>(null);
@@ -68,58 +69,17 @@ export default function App() {
 }
 
 function NotesPanel({ userId }: { userId: string }) {
-  const notes = useQuery(api.notes.listNotes, { userId }) ?? [];
-
   return (
     <div className="h-full bg-white p-6 overflow-auto">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Your Notes</h2>
           <p className="text-gray-600 mt-1">
-            {notes.length} note{notes.length !== 1 ? "s" : ""}
+            Manage and organize your thoughts
           </p>
         </div>
 
-        {notes.length === 0 ? (
-          <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-            <svg
-              className="w-16 h-16 text-gray-400 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No notes yet
-            </h3>
-            <p className="text-gray-600">Create your first note to get started!</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {notes.map((note) => (
-              <div
-                key={note._id}
-                className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {note.title}
-                </h3>
-                <p className="text-gray-600 mb-4">{note.content}</p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>
-                    Updated: {new Date(note.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <NoteList userId={userId} />
       </div>
     </div>
   );
