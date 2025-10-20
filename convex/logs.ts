@@ -111,13 +111,13 @@ export const getStats = query({
     const averageExecutionTime =
       executionTimeCount > 0 ? totalExecutionTime / executionTimeCount : 0;
 
-    // Approximate active connections from unique users in the last 5 minutes
+    // Get active connections from users table (users active in last 5 minutes)
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-    const recentLogs = allLogs.filter((log) => log.timestamp >= fiveMinutesAgo);
-    const uniqueUsers = new Set(
-      recentLogs.filter((log) => log.userId).map((log) => log.userId),
+    const allUsers = await ctx.db.query("users").collect();
+    const activeUsers = allUsers.filter(
+      (user) => user.lastActive >= fiveMinutesAgo,
     );
-    const activeConnections = uniqueUsers.size;
+    const activeConnections = activeUsers.length;
 
     return {
       totalQueries,

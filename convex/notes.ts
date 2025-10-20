@@ -1,6 +1,18 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
+
+// Helper function to update user's lastActive timestamp
+async function updateUserActivity(ctx: MutationCtx, userId: string) {
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_username", (q) => q.eq("username", userId))
+    .unique();
+
+  if (user) {
+    await ctx.db.patch(user._id, { lastActive: Date.now() });
+  }
+}
 
 export const listNotes = query({
   args: {
@@ -80,6 +92,9 @@ export const createNote = mutation({
   handler: async (ctx, args) => {
     const startTime = Date.now();
 
+    // Update user's lastActive timestamp
+    await updateUserActivity(ctx, args.userId);
+
     const now = Date.now();
     const noteId = await ctx.db.insert("notes", {
       userId: args.userId,
@@ -132,6 +147,9 @@ export const updateNote = mutation({
   handler: async (ctx, args) => {
     const startTime = Date.now();
 
+    // Update user's lastActive timestamp
+    await updateUserActivity(ctx, args.userId);
+
     const existingNote = await ctx.db.get(args.noteId);
     if (!existingNote) {
       throw new Error("Note not found");
@@ -181,6 +199,9 @@ export const deleteNote = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const startTime = Date.now();
+
+    // Update user's lastActive timestamp
+    await updateUserActivity(ctx, args.userId);
 
     const existingNote = await ctx.db.get(args.noteId);
     if (!existingNote) {
