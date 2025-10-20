@@ -11,7 +11,6 @@
 import type * as ai from "../ai.js";
 import type * as auth from "../auth.js";
 import type * as logs from "../logs.js";
-import type * as myFunctions from "../myFunctions.js";
 import type * as notes from "../notes.js";
 
 import type {
@@ -32,7 +31,6 @@ declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   auth: typeof auth;
   logs: typeof logs;
-  myFunctions: typeof myFunctions;
   notes: typeof notes;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

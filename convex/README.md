@@ -1,90 +1,97 @@
-# Welcome to your Convex functions directory!
+# Note Taker Convex Backend
 
-Write your Convex functions here.
-See https://docs.convex.dev/functions for more.
+This directory contains the Convex backend functions for the collaborative Note Taker application.
 
-A query function that takes two arguments looks like:
+## 📁 File Structure
 
-```ts
-// functions.js
-import { query } from "./_generated/server";
-import { v } from "convex/values";
+- **`schema.ts`** - Database schema definition (users, notes, logs)
+- **`auth.ts`** - Demo authentication system with workspace support
+- **`notes.ts`** - CRUD operations for notes with workspace-based permissions
+- **`logs.ts`** - Activity logging and statistics
+- **`ai.ts`** - OpenAI integration for AI-generated notes
 
-export const myQueryFunction = query({
-  // Validators for arguments.
-  args: {
-    first: v.number(),
-    second: v.string(),
-  },
+## 🗄️ Database Schema
 
-  // Function implementation.
-  handler: async (ctx, args) => {
-    // Read the database as many times as you need here.
-    // See https://docs.convex.dev/database/reading-data.
-    const documents = await ctx.db.query("tablename").collect();
+### Tables
 
-    // Arguments passed from the client are properties of the args object.
-    console.log(args.first, args.second);
+1. **users**
+   - `username` (string) - Unique username
+   - `displayName` (string) - Display name
+   - `workspace` (string) - Workspace identifier
+   - `lastActive` (number) - Timestamp of last activity
 
-    // Write arbitrary JavaScript here: filter, aggregate, build derived data,
-    // remove non-public properties, or create new objects.
-    return documents;
-  },
-});
+2. **notes**
+   - `userId` (string) - Author username
+   - `workspace` (string) - Workspace identifier
+   - `title` (string) - Note title
+   - `content` (string) - Note content
+   - `createdAt` (number) - Creation timestamp
+   - `updatedAt` (number) - Last update timestamp
+
+3. **logs**
+   - `type` (union) - query | mutation | subscription | error
+   - `operation` (string) - Function name
+   - `userId` (optional string) - User who performed the action
+   - `data` (any) - Additional log data
+   - `timestamp` (number) - When the action occurred
+   - `executionTime` (optional number) - Execution time in ms
+
+## 🔐 Permission Model
+
+- **Read Access**: All users can view notes from ALL workspaces
+- **Write Access**: Users can only edit/delete notes from THEIR workspace
+
+## 🚀 Features
+
+- Real-time collaborative note-taking
+- Workspace-based organization
+- Activity logging and monitoring
+- AI-powered note generation (OpenAI)
+- Demo authentication system
+
+## 📚 Key Functions
+
+### Authentication (`auth.ts`)
+
+- `loginDemoUser` - Login/create user with workspace
+- `logoutUser` - Logout user
+- `getCurrentUser` - Get user by username
+- `getActiveUsers` - Get active users in a workspace
+
+### Notes (`notes.ts`)
+
+- `listNotes` - Get all notes (from all workspaces)
+- `searchNotes` - Search notes across all workspaces
+- `createNote` - Create a new note
+- `updateNote` - Update note (workspace permission check)
+- `deleteNote` - Delete note (workspace permission check)
+
+### Logs (`logs.ts`)
+
+- `addLog` - Add activity log entry
+- `getLogs` - Get recent logs
+- `getStats` - Get system statistics
+- `clearLogs` - Clear all logs
+
+### AI (`ai.ts`)
+
+- `generateRandomNote` - Generate creative note using OpenAI
+
+## 🛠️ Development
+
+Push schema and functions to Convex:
+
+```bash
+npx convex dev
 ```
 
-Using this query function in a React component looks like:
+Open Convex Dashboard:
 
-```ts
-const data = useQuery(api.functions.myQueryFunction, {
-  first: 10,
-  second: "hello",
-});
+```bash
+npx convex dashboard
 ```
 
-A mutation function looks like:
+## 📖 Learn More
 
-```ts
-// functions.js
-import { mutation } from "./_generated/server";
-import { v } from "convex/values";
-
-export const myMutationFunction = mutation({
-  // Validators for arguments.
-  args: {
-    first: v.string(),
-    second: v.string(),
-  },
-
-  // Function implementation.
-  handler: async (ctx, args) => {
-    // Insert or modify documents in the database here.
-    // Mutations can also read from the database like queries.
-    // See https://docs.convex.dev/database/writing-data.
-    const message = { body: args.first, author: args.second };
-    const id = await ctx.db.insert("messages", message);
-
-    // Optionally, return a value from your mutation.
-    return await ctx.db.get(id);
-  },
-});
-```
-
-Using this mutation function in a React component looks like:
-
-```ts
-const mutation = useMutation(api.functions.myMutationFunction);
-function handleButtonPress() {
-  // fire and forget, the most common way to use mutations
-  mutation({ first: "Hello!", second: "me" });
-  // OR
-  // use the result once the mutation has completed
-  mutation({ first: "Hello!", second: "me" }).then((result) =>
-    console.log(result),
-  );
-}
-```
-
-Use the Convex CLI to push your functions to a deployment. See everything
-the Convex CLI can do by running `npx convex -h` in your project root
-directory. To learn more, launch the docs with `npx convex docs`.
+- [Convex Documentation](https://docs.convex.dev)
+- [Convex React Integration](https://docs.convex.dev/client/react)

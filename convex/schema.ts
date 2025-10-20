@@ -1,15 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
-// The schema is entirely optional.
-// You can delete this file (schema.ts) and the
-// app will continue to work.
-// The schema provides more precise TypeScript types.
+/**
+ * Database schema for the Note Taker application
+ * Defines tables for users, notes, and activity logs
+ */
 export default defineSchema({
-  numbers: defineTable({
-    value: v.number(),
-  }),
-
   users: defineTable({
     username: v.string(),
     displayName: v.string(),
