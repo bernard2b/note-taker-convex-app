@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { NoteModal } from "./NoteModal";
 
 type NoteItemProps = {
   id: Id<"notes">;
@@ -24,6 +25,7 @@ export function NoteItem({
   const [editTitle, setEditTitle] = useState(title);
   const [editContent, setEditContent] = useState(content);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const updateNote = useMutation(api.notes.updateNote);
   const deleteNote = useMutation(api.notes.deleteNote);
@@ -141,8 +143,12 @@ export function NoteItem({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer group hover:border-gray-300">
-      <div className="flex items-start justify-between mb-3">
+    <>
+      <div
+        className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer group hover:border-gray-300"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <div className="flex items-start justify-between mb-3">
         <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors flex-1 pr-4">
           {title}
         </h3>
@@ -228,6 +234,17 @@ export function NoteItem({
         </div>
       </div>
     </div>
+
+      {/* Modal for viewing full note */}
+      <NoteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={title}
+        content={content}
+        createdAt={createdAt}
+        updatedAt={updatedAt}
+      />
+    </>
   );
 }
 
