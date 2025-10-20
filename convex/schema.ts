@@ -13,16 +13,22 @@ export default defineSchema({
   users: defineTable({
     username: v.string(),
     displayName: v.string(),
+    workspace: v.string(),
     lastActive: v.number(),
-  }).index("by_username", ["username"]),
+  })
+    .index("by_username", ["username"])
+    .index("by_workspace", ["workspace"]),
 
   notes: defineTable({
     userId: v.string(),
+    workspace: v.string(),
     title: v.string(),
     content: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_user_id", ["userId"]),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_workspace", ["workspace"]),
 
   logs: defineTable({
     type: v.union(

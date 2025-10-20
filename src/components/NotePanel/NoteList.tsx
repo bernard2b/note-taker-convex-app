@@ -6,19 +6,20 @@ import { NoteForm } from "./NoteForm";
 
 type NoteListProps = {
   userId: string;
+  workspace: string;
 };
 
-export function NoteList({ userId }: NoteListProps) {
+export function NoteList({ userId, workspace }: NoteListProps) {
   const [showForm, setShowForm] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  const notes = useQuery(api.notes.listNotes, { userId });
+  const notes = useQuery(api.notes.listNotes, { workspace });
   const generateRandomNote = useAction(api.ai.generateRandomNote);
 
   const handleGenerateNote = async () => {
     setIsGenerating(true);
     try {
-      await generateRandomNote({ userId });
+      await generateRandomNote({ userId, workspace });
     } catch (error) {
       console.error("Failed to generate note:", error);
       alert("Failed to generate note. Please check your OpenAI API key.");
@@ -171,6 +172,7 @@ export function NoteList({ userId }: NoteListProps) {
         <div className="animate-slide-in-up">
           <NoteForm
             userId={userId}
+            workspace={workspace}
             onCancel={() => setShowForm(false)}
             onSuccess={() => setShowForm(false)}
           />
@@ -191,6 +193,8 @@ export function NoteList({ userId }: NoteListProps) {
             <NoteItem
               id={note._id}
               userId={userId}
+              workspace={workspace}
+              noteAuthor={note.userId}
               title={note.title}
               content={note.content}
               createdAt={note.createdAt}

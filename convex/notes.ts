@@ -16,13 +16,14 @@ async function updateUserActivity(ctx: MutationCtx, userId: string) {
 
 export const listNotes = query({
   args: {
-    userId: v.string(),
+    workspace: v.string(),
   },
   returns: v.array(
     v.object({
       _id: v.id("notes"),
       _creationTime: v.number(),
       userId: v.string(),
+      workspace: v.string(),
       title: v.string(),
       content: v.string(),
       createdAt: v.number(),
@@ -32,7 +33,7 @@ export const listNotes = query({
   handler: async (ctx, args) => {
     const notes = await ctx.db
       .query("notes")
-      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .withIndex("by_workspace", (q) => q.eq("workspace", args.workspace))
       .order("desc")
       .collect();
 
@@ -42,7 +43,7 @@ export const listNotes = query({
 
 export const searchNotes = query({
   args: {
-    userId: v.string(),
+    workspace: v.string(),
     searchString: v.string(),
   },
   returns: v.array(
@@ -50,6 +51,7 @@ export const searchNotes = query({
       _id: v.id("notes"),
       _creationTime: v.number(),
       userId: v.string(),
+      workspace: v.string(),
       title: v.string(),
       content: v.string(),
       createdAt: v.number(),
@@ -61,7 +63,7 @@ export const searchNotes = query({
 
     const allNotes = await ctx.db
       .query("notes")
-      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .withIndex("by_workspace", (q) => q.eq("workspace", args.workspace))
       .collect();
 
     const matchingNotes = allNotes.filter(
@@ -77,6 +79,7 @@ export const searchNotes = query({
 export const createNote = mutation({
   args: {
     userId: v.string(),
+    workspace: v.string(),
     title: v.string(),
     content: v.string(),
   },
@@ -84,6 +87,7 @@ export const createNote = mutation({
     _id: v.id("notes"),
     _creationTime: v.number(),
     userId: v.string(),
+    workspace: v.string(),
     title: v.string(),
     content: v.string(),
     createdAt: v.number(),
@@ -98,6 +102,7 @@ export const createNote = mutation({
     const now = Date.now();
     const noteId = await ctx.db.insert("notes", {
       userId: args.userId,
+      workspace: args.workspace,
       title: args.title,
       content: args.content,
       createdAt: now,
@@ -131,6 +136,7 @@ export const createNote = mutation({
 export const updateNote = mutation({
   args: {
     userId: v.string(),
+    workspace: v.string(),
     noteId: v.id("notes"),
     title: v.string(),
     content: v.string(),
@@ -139,6 +145,7 @@ export const updateNote = mutation({
     _id: v.id("notes"),
     _creationTime: v.number(),
     userId: v.string(),
+    workspace: v.string(),
     title: v.string(),
     content: v.string(),
     createdAt: v.number(),
@@ -155,8 +162,9 @@ export const updateNote = mutation({
       throw new Error("Note not found");
     }
 
-    if (existingNote.userId !== args.userId) {
-      throw new Error("Unauthorized: You don't own this note");
+    // Check if user is in the same workspace as the note
+    if (existingNote.workspace !== args.workspace) {
+      throw new Error("Unauthorized: Note belongs to a different workspace");
     }
 
     const now = Date.now();
@@ -194,6 +202,7 @@ export const updateNote = mutation({
 export const deleteNote = mutation({
   args: {
     userId: v.string(),
+    workspace: v.string(),
     noteId: v.id("notes"),
   },
   returns: v.null(),
@@ -208,8 +217,9 @@ export const deleteNote = mutation({
       throw new Error("Note not found");
     }
 
-    if (existingNote.userId !== args.userId) {
-      throw new Error("Unauthorized: You don't own this note");
+    // Check if user is in the same workspace as the note
+    if (existingNote.workspace !== args.workspace) {
+      throw new Error("Unauthorized: Note belongs to a different workspace");
     }
 
     await ctx.db.delete(args.noteId);

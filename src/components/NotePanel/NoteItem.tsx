@@ -7,6 +7,8 @@ import { NoteModal } from "./NoteModal";
 type NoteItemProps = {
   id: Id<"notes">;
   userId: string;
+  workspace: string;
+  noteAuthor: string;
   title: string;
   content: string;
   createdAt: number;
@@ -16,6 +18,8 @@ type NoteItemProps = {
 export function NoteItem({
   id,
   userId,
+  workspace,
+  noteAuthor,
   title,
   content,
   createdAt,
@@ -36,6 +40,7 @@ export function NoteItem({
     try {
       await updateNote({
         userId,
+        workspace,
         noteId: id,
         title: editTitle.trim(),
         content: editContent.trim(),
@@ -57,7 +62,7 @@ export function NoteItem({
 
     setIsDeleting(true);
     try {
-      await deleteNote({ userId, noteId: id });
+      await deleteNote({ userId, workspace, noteId: id });
     } catch (error) {
       console.error("Failed to delete note:", error);
       setIsDeleting(false);
@@ -149,9 +154,16 @@ export function NoteItem({
         onClick={() => setIsModalOpen(true)}
       >
         <div className="flex items-start justify-between mb-3">
-        <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors flex-1 pr-4">
-          {title}
-        </h3>
+        <div className="flex-1 pr-4">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              {title}
+            </h3>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${noteAuthor === userId ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+              {noteAuthor === userId ? 'You' : noteAuthor}
+            </span>
+          </div>
+        </div>
         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={(e) => {

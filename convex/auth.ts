@@ -5,12 +5,14 @@ import { api } from "./_generated/api";
 export const loginDemoUser = mutation({
   args: {
     username: v.string(),
+    workspace: v.string(),
   },
   returns: v.object({
     _id: v.id("users"),
     _creationTime: v.number(),
     username: v.string(),
     displayName: v.string(),
+    workspace: v.string(),
     lastActive: v.number(),
   }),
   handler: async (ctx, args) => {
@@ -26,7 +28,9 @@ export const loginDemoUser = mutation({
     let isNewUser = false;
 
     if (existingUser) {
+      // Update existing user's workspace and lastActive
       await ctx.db.patch(existingUser._id, {
+        workspace: args.workspace,
         lastActive: now,
       });
 
@@ -39,6 +43,7 @@ export const loginDemoUser = mutation({
       const userId = await ctx.db.insert("users", {
         username: args.username,
         displayName: args.username,
+        workspace: args.workspace,
         lastActive: now,
       });
 
@@ -59,6 +64,7 @@ export const loginDemoUser = mutation({
       userId: args.username,
       data: {
         username: args.username,
+        workspace: args.workspace,
         isNewUser,
       },
       executionTime,
@@ -117,6 +123,7 @@ export const getCurrentUser = query({
       _creationTime: v.number(),
       username: v.string(),
       displayName: v.string(),
+      workspace: v.string(),
       lastActive: v.number(),
     }),
     v.null(),
@@ -132,22 +139,28 @@ export const getCurrentUser = query({
 });
 
 export const getActiveUsers = query({
-  args: {},
+  args: {
+    workspace: v.string(),
+  },
   returns: v.array(
     v.object({
       _id: v.id("users"),
       _creationTime: v.number(),
       username: v.string(),
       displayName: v.string(),
+      workspace: v.string(),
       lastActive: v.number(),
     }),
   ),
-  handler: async (ctx, _args) => {
+  handler: async (ctx, args) => {
     const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
 
-    const allUsers = await ctx.db.query("users").collect();
+    const workspaceUsers = await ctx.db
+      .query("users")
+      .withIndex("by_workspace", (q) => q.eq("workspace", args.workspace))
+      .collect();
 
-    const activeUsers = allUsers.filter(
+    const activeUsers = workspaceUsers.filter(
       (user) => user.lastActive >= fiveMinutesAgo,
     );
 

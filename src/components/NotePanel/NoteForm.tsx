@@ -4,11 +4,12 @@ import { api } from "../../../convex/_generated/api";
 
 type NoteFormProps = {
   userId: string;
+  workspace: string;
   onCancel?: () => void;
   onSuccess?: () => void;
 };
 
-export function NoteForm({ userId, onCancel, onSuccess }: NoteFormProps) {
+export function NoteForm({ userId, workspace, onCancel, onSuccess }: NoteFormProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,6 +65,7 @@ export function NoteForm({ userId, onCancel, onSuccess }: NoteFormProps) {
     try {
       await createNote({
         userId,
+        workspace,
         title: title.trim(),
         content: content.trim() || "No content",
       });

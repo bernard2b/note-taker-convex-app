@@ -1,19 +1,20 @@
 import { useState } from "react";
 
 type LoginScreenProps = {
-  onLogin: (username: string) => void | Promise<void>;
+  onLogin: (username: string, workspace: string) => void | Promise<void>;
 };
 
 export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [username, setUsername] = useState("");
+  const [workspace, setWorkspace] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) return;
+    if (!username.trim() || !workspace.trim()) return;
 
     setIsLoading(true);
-    void Promise.resolve(onLogin(username.trim())).finally(() => {
+    void Promise.resolve(onLogin(username.trim(), workspace.trim())).finally(() => {
       setIsLoading(false);
     });
   };
@@ -40,7 +41,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-            <p className="text-gray-500">Enter your username to continue</p>
+            <p className="text-gray-500">Join your team workspace</p>
           </div>
 
           {/* Form */}
@@ -64,9 +65,30 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               />
             </div>
 
+            <div className="space-y-2">
+              <label
+                htmlFor="workspace"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Workspace
+              </label>
+              <input
+                id="workspace"
+                type="text"
+                value={workspace}
+                onChange={(e) => setWorkspace(e.target.value)}
+                placeholder="team-alpha, project-x, etc."
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors outline-none text-gray-900 placeholder-gray-400"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Users in the same workspace can collaborate on notes together
+              </p>
+            </div>
+
             <button
               type="submit"
-              disabled={!username.trim() || isLoading}
+              disabled={!username.trim() || !workspace.trim() || isLoading}
               className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               {isLoading ? (

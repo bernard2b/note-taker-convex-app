@@ -15,6 +15,7 @@ import { api } from "./_generated/api";
 export const generateRandomNote = action({
   args: {
     userId: v.string(),
+    workspace: v.string(),
   },
   returns: v.object({
     title: v.string(),
@@ -87,6 +88,7 @@ export const generateRandomNote = action({
       // This demonstrates the ACTION -> MUTATION pattern
       const noteId = await ctx.runMutation(api.notes.createNote, {
         userId: args.userId,
+        workspace: args.workspace,
         title,
         content,
       });
