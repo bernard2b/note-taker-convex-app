@@ -7,7 +7,8 @@ import { NoteModal } from "./NoteModal";
 type NoteItemProps = {
   id: Id<"notes">;
   userId: string;
-  workspace: string;
+  userWorkspace: string;
+  noteWorkspace: string;
   noteAuthor: string;
   title: string;
   content: string;
@@ -18,7 +19,8 @@ type NoteItemProps = {
 export function NoteItem({
   id,
   userId,
-  workspace,
+  userWorkspace,
+  noteWorkspace,
   noteAuthor,
   title,
   content,
@@ -34,13 +36,17 @@ export function NoteItem({
   const updateNote = useMutation(api.notes.updateNote);
   const deleteNote = useMutation(api.notes.deleteNote);
 
+  // Check if user can edit (same workspace)
+  const canEdit = userWorkspace === noteWorkspace;
+  const isFromDifferentWorkspace = userWorkspace !== noteWorkspace;
+
   const handleSave = async () => {
     if (!editTitle.trim() || !editContent.trim()) return;
 
     try {
       await updateNote({
         userId,
-        workspace,
+        workspace: userWorkspace,
         noteId: id,
         title: editTitle.trim(),
         content: editContent.trim(),
@@ -48,6 +54,7 @@ export function NoteItem({
       setIsEditing(false);
     } catch (error) {
       console.error("Failed to update note:", error);
+      alert("You can only edit notes from your workspace.");
     }
   };
 
@@ -62,9 +69,10 @@ export function NoteItem({
 
     setIsDeleting(true);
     try {
-      await deleteNote({ userId, workspace, noteId: id });
+      await deleteNote({ userId, workspace: userWorkspace, noteId: id });
     } catch (error) {
       console.error("Failed to delete note:", error);
+      alert("You can only delete notes from your workspace.");
       setIsDeleting(false);
     }
   };
@@ -155,24 +163,36 @@ export function NoteItem({
       >
         <div className="flex items-start justify-between mb-3">
         <div className="flex-1 pr-4">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
               {title}
             </h3>
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${noteAuthor === userId ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
               {noteAuthor === userId ? 'You' : noteAuthor}
             </span>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isFromDifferentWorkspace ? 'bg-orange-100 text-orange-700 border border-orange-200' : 'bg-blue-100 text-blue-700'}`}>
+              {noteWorkspace}
+            </span>
+            {isFromDifferentWorkspace && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-500 border border-gray-300">
+                <svg className="w-3 h-3 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+                Read-only
+              </span>
+            )}
           </div>
         </div>
-        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditing(true);
-            }}
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            aria-label="Edit note"
-          >
+        {canEdit && (
+          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
+              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              aria-label="Edit note"
+            >
             <svg
               className="w-5 h-5"
               fill="none"
@@ -210,6 +230,7 @@ export function NoteItem({
             </svg>
           </button>
         </div>
+        )}
       </div>
 
       <p className="text-gray-600 mb-4 line-clamp-2">{contentPreview}</p>

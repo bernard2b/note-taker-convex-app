@@ -15,9 +15,7 @@ async function updateUserActivity(ctx: MutationCtx, userId: string) {
 }
 
 export const listNotes = query({
-  args: {
-    workspace: v.string(),
-  },
+  args: {},
   returns: v.array(
     v.object({
       _id: v.id("notes"),
@@ -30,12 +28,9 @@ export const listNotes = query({
       updatedAt: v.number(),
     }),
   ),
-  handler: async (ctx, args) => {
-    const notes = await ctx.db
-      .query("notes")
-      .withIndex("by_workspace", (q) => q.eq("workspace", args.workspace))
-      .order("desc")
-      .collect();
+  handler: async (ctx, _args) => {
+    // Return ALL notes from ALL workspaces
+    const notes = await ctx.db.query("notes").order("desc").collect();
 
     return notes.sort((a, b) => b.updatedAt - a.updatedAt);
   },
@@ -43,7 +38,6 @@ export const listNotes = query({
 
 export const searchNotes = query({
   args: {
-    workspace: v.string(),
     searchString: v.string(),
   },
   returns: v.array(
@@ -61,10 +55,8 @@ export const searchNotes = query({
   handler: async (ctx, args) => {
     const searchLower = args.searchString.toLowerCase().trim();
 
-    const allNotes = await ctx.db
-      .query("notes")
-      .withIndex("by_workspace", (q) => q.eq("workspace", args.workspace))
-      .collect();
+    // Search ALL notes from ALL workspaces
+    const allNotes = await ctx.db.query("notes").collect();
 
     const matchingNotes = allNotes.filter(
       (note) =>

@@ -89,16 +89,27 @@ function NotesPanel({ userId, workspace }: { userId: string; workspace: string }
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Team Notes</h2>
+              <h2 className="text-2xl font-bold text-gray-900">All Notes</h2>
               <p className="text-gray-600 mt-1">
-                Collaborative workspace: <span className="font-medium text-blue-600">{workspace}</span>
+                Your workspace: <span className="font-medium text-blue-600">{workspace}</span>
+                <span className="text-gray-400 mx-2">•</span>
+                <span className="text-sm text-gray-500">View all, edit your workspace</span>
               </p>
             </div>
-            <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-              <svg className="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-              </svg>
-              Shared
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                <svg className="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Can Edit
+              </div>
+              <div className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                <svg className="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                </svg>
+                View All
+              </div>
             </div>
           </div>
         </div>

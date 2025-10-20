@@ -13,7 +13,8 @@ export function NoteList({ userId, workspace }: NoteListProps) {
   const [showForm, setShowForm] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  const notes = useQuery(api.notes.listNotes, { workspace });
+  // Fetch ALL notes from ALL workspaces
+  const notes = useQuery(api.notes.listNotes);
   const generateRandomNote = useAction(api.ai.generateRandomNote);
 
   const handleGenerateNote = async () => {
@@ -193,7 +194,8 @@ export function NoteList({ userId, workspace }: NoteListProps) {
             <NoteItem
               id={note._id}
               userId={userId}
-              workspace={workspace}
+              userWorkspace={workspace}
+              noteWorkspace={note.workspace}
               noteAuthor={note.userId}
               title={note.title}
               content={note.content}
