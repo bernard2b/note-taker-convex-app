@@ -57,7 +57,7 @@ export const searchNotes = query({
     }),
   ),
   handler: async (ctx, args) => {
-    const searchLower = args.searchString.toLowerCase();
+    const searchLower = args.searchString.toLowerCase().trim();
 
     const allNotes = await ctx.db
       .query("notes")

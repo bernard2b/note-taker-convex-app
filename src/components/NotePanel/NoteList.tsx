@@ -1,9 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { NoteItem } from "./NoteItem";
 import { NoteForm } from "./NoteForm";
-import { SearchBar } from "./SearchBar";
 
 type NoteListProps = {
   userId: string;
@@ -11,24 +10,8 @@ type NoteListProps = {
 
 export function NoteList({ userId }: NoteListProps) {
   const [showForm, setShowForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   
-  // Use searchNotes when searching, listNotes otherwise
-  const searchResults = useQuery(
-    api.notes.searchNotes,
-    searchTerm ? { userId, searchString: searchTerm } : "skip"
-  );
-  const allNotes = useQuery(
-    api.notes.listNotes,
-    !searchTerm ? { userId } : "skip"
-  );
-  
-  // Determine which notes to display
-  const notes = searchTerm ? searchResults : allNotes;
-  
-  const handleSearch = useCallback((term: string) => {
-    setSearchTerm(term);
-  }, []);
+  const notes = useQuery(api.notes.listNotes, { userId });
 
   // Loading state - skeleton loaders
   if (notes === undefined) {
@@ -100,12 +83,6 @@ export function NoteList({ userId }: NoteListProps) {
   // Notes list with animations - updates automatically via Convex real-time
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
-      <SearchBar 
-        onSearch={handleSearch}
-        resultCount={searchTerm ? notes?.length : undefined}
-      />
-
       {/* Create Note Button / Form Toggle */}
       {!showForm ? (
         <button
@@ -138,7 +115,7 @@ export function NoteList({ userId }: NoteListProps) {
       )}
 
       {/* Notes List */}
-      {notes && notes.length > 0 ? (
+      {notes && notes.length > 0 && (
         notes.map((note, index) => (
           <div
             key={note._id}
@@ -158,29 +135,7 @@ export function NoteList({ userId }: NoteListProps) {
             />
           </div>
         ))
-      ) : searchTerm && notes ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-          <svg
-            className="w-16 h-16 text-gray-400 mx-auto mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No notes found
-          </h3>
-          <p className="text-gray-600">
-            Try adjusting your search terms
-          </p>
-        </div>
-      ) : null}
+      )}
     </div>
   );
 }

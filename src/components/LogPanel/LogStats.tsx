@@ -19,22 +19,6 @@ export function LogStats() {
 
   const statItems = [
     {
-      label: "Total Queries",
-      value: stats.totalQueries,
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      ),
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-    },
-    {
       label: "Total Mutations",
       value: stats.totalMutations,
       icon: (
@@ -51,25 +35,7 @@ export function LogStats() {
       bgColor: "bg-blue-50",
     },
     {
-      label: "Avg Execution Time",
-      value: stats.averageExecutionTime
-        ? `${stats.averageExecutionTime.toFixed(1)}ms`
-        : "N/A",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-          />
-        </svg>
-      ),
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-    },
-    {
-      label: "Active Connections",
+      label: "Active Users",
       value: stats.activeConnections,
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,8 +47,8 @@ export function LogStats() {
           />
         </svg>
       ),
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
     },
   ];
 
