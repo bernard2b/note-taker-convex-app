@@ -22,8 +22,10 @@ export default function App() {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) {
       setUsername(storedUsername);
+      // Update user's lastActive timestamp on session restore
+      void loginDemoUser({ username: storedUsername });
     }
-  }, []);
+  }, [loginDemoUser]);
 
   const handleLogin = async (newUsername: string) => {
     await loginDemoUser({ username: newUsername });
