@@ -54,6 +54,16 @@ Set your OpenAI API key in Convex environment variables (used only in an Action)
 npx convex env set OPENAI_API_KEY sk-...your-key...
 ```
 
+Since OpenAI don't have free API anymore, alternatively, you can use a Google Gemini API key as well, it will automatically fall back to Gemini if no OpenAI API key is provided.
+
+```bash
+npx convex env set GEMINI_API_KEY ...your-key...
+```
+
+You can get a free API key on the Google AI studio website.
+https://aistudio.google.com/
+
+
 ### Other useful scripts
 
 - `npm run build` – typecheck and build
